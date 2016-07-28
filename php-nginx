@@ -15,4 +15,4 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 RUN rm /etc/nginx/sites-enabled/default.conf
 
 COPY config/php/app.conf /etc/nginx/sites-enabled/
-COPY config/php/quintype_upstream.conf /etc/nginx/sites-available/
+COPY config/php/quintype_upstream.conf /etc/nginx/sites-enabled/
