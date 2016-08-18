@@ -1,0 +1,14 @@
+FROM quintype/docker-base:jruby-rails
+
+MAINTAINER Quintype Developers <dev-core@quintype.com>
+
+RUN useradd -ms /bin/bash app
+ADD . /app
+RUN chown -R app:app /app
+
+USER app
+WORKDIR /app
+
+RUN bundle install --without development --deployment
+RUN npm install
+RUN find . -not -path 'node_modules/*' -and -not -path 'vendor/bundle/*' -exec echo {} +
