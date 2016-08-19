@@ -1,14 +1,35 @@
-FROM quintype/docker-base:jruby-rails
+FROM jruby:9.0-jdk
 
 MAINTAINER Quintype Developers <dev-core@quintype.com>
 
+ENV EXECJS_RUNTIME Node
+ENV NODE_ENV production
+ENV RAILS_ENV production
+ENV RACK_ENV production
+ENV RAILS_SERVE_STATIC_FILES true
+
+EXPOSE 3000
+
+RUN curl -sL https://deb.nodesource.com/setup_6.x | bash
+RUN apt-get update && apt-get install -y htop curl git nodejs
+
 RUN useradd -ms /bin/bash app
+WORKDIR /app
+
+ENTRYPOINT ["bundle", "exec"]
+CMD ["puma", "-t", "8:24"]
+
+# Speed up compile by putting stuff here
+ENV JRUBY_OPTS -J-Xms512m -J-Xmx768m
+
+RUN ln -s /app/log /var/log/rails-app
+
 ADD . /app
 RUN chown -R app:app /app
 
 USER app
-WORKDIR /app
-
 RUN bundle install --without development --deployment
 RUN npm install
-RUN find . -not -path 'node_modules/*' -and -not -path 'vendor/bundle/*' -exec echo {} +
+RUN find . -not \( -path ./node_modules -prune \) -not \( -path ./vendor/bundle -prune \) -not \( -path ./vendor -or -path . \) -exec rm -rf {} +
+
+USER root
