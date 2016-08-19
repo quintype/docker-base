@@ -1,0 +1,16 @@
+#!/bin/bash -e
+
+OUTPUT="$1"
+BASE_PATH=$(dirname $0)/..
+
+TEMP_DIR=$(mktemp -d /tmp/build-dockerXXXXXX)
+cp $BASE_PATH/lib/jruby-rails-app-base "$TEMP_DIR/Dockerfile"
+cp Gemfile Gemfile.lock package.json "$TEMP_DIR"
+cp npm-shrinkwrap.json "$TEMP_DIR" || true
+
+pushd "$TEMP_DIR"
+zip output.zip *
+popd
+
+cp "$TEMP_DIR/output.zip" "$OUTPUT"
+rm -rf "$TEMP_DIR"

@@ -22,7 +22,7 @@ CMD ["puma", "-t", "8:24"]
 # Speed up compile by putting stuff here
 ENV JRUBY_OPTS -J-Xms512m -J-Xmx768m
 
-RUN ln -s /app/log /var/log/rails-app
+RUN ln -s /app/log /var/log/app
 
 ADD . /app
 RUN chown -R app:app /app
