@@ -1,0 +1,29 @@
+#!/bin/bash -e
+
+REPO="$1"
+AUTH="$2"
+BASE_PATH=$(dirname $0)/..
+TEMP_DIR=$(mktemp -d /tmp/build-dockerXXXXXX)
+
+echo Testing Connection
+curl -H "Authorization: Bearer $AUTH" "https://quay.io/api/v1/repository/$REPO/build/" > /dev/null
+
+echo Building Zip
+cp $BASE_PATH/lib/jruby-rails-app-base "$TEMP_DIR/Dockerfile"
+cp Gemfile Gemfile.lock package.json "$TEMP_DIR"
+cp npm-shrinkwrap.json "$TEMP_DIR" || true
+
+echo Uploading File
+pushd "$TEMP_DIR"
+zip output.zip *
+JSON_DATA=$(curl -H "Authorization: Bearer $AUTH" -H "Content-Type: application/json" -d '{"mimeType":"application/zip"}' 'https://quay.io/api/v1/filedrop/')
+FILE_URL=$(echo "$JSON_DATA" | ruby -r json -e 'puts JSON.parse($stdin.read)["url"]')
+FILE_ID=$(echo "$JSON_DATA" | ruby -r json -e 'puts JSON.parse($stdin.read)["file_id"]')
+curl -X PUT -T output.zip -H "Content-Type: application/zip" "$FILE_URL"
+popd
+
+echo Triggering Build
+curl -H "Authorization: Bearer $AUTH" -H "Content-Type: application/json" -d "{\"file_id\":\"$FILE_ID\",\"docker_tags\":[\"base-image\"]}" "https://quay.io/api/v1/repository/$REPO/build/" > /dev/null
+
+rm -rf "$TEMP_DIR"
+echo Done
