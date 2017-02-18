@@ -8,5 +8,5 @@ RUN apk update && apk add htop curl git make g++ nodejs=6.7.0-r0
 
 RUN rm /etc/nginx/sites-enabled/default.conf
 
-COPY config/php/app.conf /etc/nginx/sites-enabled/
+COPY config/php/app.alpine.conf /etc/nginx/sites-enabled/app.conf
 COPY config/php/quintype_upstream.conf /etc/nginx/sites-enabled/
