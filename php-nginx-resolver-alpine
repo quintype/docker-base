@@ -1,0 +1,12 @@
+FROM quay.io/quintype/nginx:php-nginx-resolver-alpine
+
+MAINTAINER Quintype Developers <dev-core@quintype.com>
+
+EXPOSE 3000
+
+RUN apk update && apk add htop curl git make g++ nodejs=6.7.0-r1
+
+RUN rm /etc/nginx/sites-enabled/default.conf
+
+COPY config/php/app.alpine.conf /etc/nginx/sites-enabled/app.conf
+COPY config/php/quintype_upstream.conf /etc/nginx/sites-enabled/
